@@ -71,9 +71,3 @@ exibir_fileira([false | Resto]) :-
     write('X '),
     exibir_fileira(Resto).
 
-
-% Função para associar um filme a uma sala
-associar_filme_sala(N, Titulo, Genero, Duracao) :-
-    assert(filme(Titulo, Genero, Duracao, 0)),
-    cadastra_sala(N, 10),
-    associar_sala_filme_horario(N, Titulo, '19:00').
