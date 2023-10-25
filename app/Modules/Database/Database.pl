@@ -57,3 +57,19 @@ createIngressoDatabase(Username, FilmeName, IdFilme, Valor, Assento) :-
 deleteIngressoDatabase(Username, Name) :-
     atomic_list_concat([directoryDatabase, Username, '/ingressos/', ListName], DirectoryPath),
     delete_directory(DirectoryPath).
+
+%Funções relacionadas a Filmes
+createFilmeDatabase(NomeFilme, IdFilme, Valor) :-
+    atomic_list_concat(['Modules/Database/', '/Filmes/', NomeFilme], ListDir),
+    atomic_list_concat([ListDir, '/', NomeFilme, '.txt'], FilePath),
+\+ exists_directory(ListDir), % Verifica se o diretório não existe
+    make_directory_path(ListDir), % Cria o diretório e seus pais, se necessário
+    open(FilePath, write, Stream),
+    format(Stream, "~w~n", [IdFilme]),
+    format(Stream, "~w~n", [NomeFilme]),
+    format(Stream, "~w~n", [Valor]),
+    close(Stream).
+
+deleteFilmeDatabase(NomeFilme) :-
+    atomic_list_concat([directoryDatabase, '/filmes/', ListName], DirectoryPath),
+    delete_directory(DirectoryPath).

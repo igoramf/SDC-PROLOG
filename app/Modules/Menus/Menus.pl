@@ -1,9 +1,11 @@
 :- consult('../Users/User.pl').
 :- consult('../Ingresso/Ingresso.pl').
+:- consult('../Filmes/Filme.pl').
 :- consult('../Util/Util.pl').
 %:- consult('../ToDoList/ToDoList.pl').
 :- consult('../Database/Database.pl').
 :- consult('../Sala/Sala.pl').
+
 
 menuInicial :-
     write('____________________________'), nl,
@@ -80,7 +82,7 @@ telaCadastroAdm :-
 
 telaLogin(Login) :-
     write('________________________'), nl,
-    write('Menu>Login'), nl,
+    write('Menu'), nl,
     write('________________________'), nl,
     write('1 - Perfil'), nl,
     write('2 - Ingressos'), nl,
@@ -101,7 +103,7 @@ telaLogin(Login) :-
 
 telaUserIngressos(Login) :-
     write('________________________'), nl,
-    write('Menu>Login>Ingressos'), nl,
+    write('Menu>Ingressos'), nl,
     write('________________________'), nl,
     write('1 - Ver meus ingressos'), nl,
     write('2 - Comprar Ingressos'), nl,
@@ -115,6 +117,9 @@ telaUserIngressos(Login) :-
         Opcao = 2 ->
             telaCompraIngressos(Login)
         ;
+        Opcao = 3 ->
+            telaListaFilmes(Login)
+        ;
         Opcao = 4 ->
             telaLogin(Login)
         ;
@@ -126,7 +131,7 @@ telaListaIngressos(Login) :-
     concatenar_strings(Directory, Login, DirectoryLogin),
     concatenar_strings(DirectoryLogin, '/', DirectoryLoginBarra),
     concatenar_strings(DirectoryLoginBarra, 'ingressos', DirectoryIngressos),
-    write('Menu>Login>Ingressos>Meus Ingressos'), nl,
+    write('Menu>Ingressos>Meus Ingressos'), nl,
     write(''), nl,
     write('Meus Ingressos:'), nl,
     list_folders(DirectoryIngressos, Login, Login).
@@ -145,7 +150,7 @@ telaCompraIngressos(Login) :-
 
 telaLoginAdm(Login) :-
     write('________________________'), nl,
-    write('Menu>Login'), nl,
+    write('Menu>Administracao'), nl,
     write('________________________'), nl,
     write('1 - Perfil'), nl,
     write('2 - Cadastrar Filmes'), nl,
@@ -157,7 +162,7 @@ telaLoginAdm(Login) :-
             telaPerfil(Login)
         ;
         Opcao = 2 ->
-            telaListas(Login)
+            telaCadastraFilme(Login)
         ;
         Opcao = 3 ->
             menuInicial
@@ -170,11 +175,11 @@ telaLoginAdm(Login) :-
 
 telaPerfil(Login) :-
     write('________________________'),nl,
-    write('Menu>Login>Opcoes>Perfil'), nl,
+    write('Menu>Perfil'), nl,
     write('________________________'), nl,
     write('1 - Exibir Perfil'), nl,
     %write('2 - Deletar Perfil'), nl,
-    write('2 - Sair'), nl,
+    write('2 - Voltar'), nl,
     read(Opcao),
     (
         Opcao = 1 ->
@@ -188,7 +193,7 @@ telaPerfil(Login) :-
 
 telaExibirPerfil(Login) :-
     write('___________________________________'),nl,
-    write('Menu>Login>Opcoes>Perfil>MenuPerfil'), nl,
+    write('Menu>Perfil>Menu Perfil'), nl,
     write('___________________________________'),nl,
     write('Nome: '), nl,
     getDados(Login, Dados),
@@ -206,6 +211,21 @@ telaExibirPerfil(Login) :-
             write('Opcao Invalida!'), nl
     ).
 
+telaCadastraFilme(Login) :-
+    write('Nome do Filme: '), nl,
+    read(Nome),
+    write('Id do Filme: '), nl,
+    read(IdFilme),
+    write('Valor: '), nl,
+    read(Valor),
+    createFilme(Nome, IdFilme, Valor),
+    write('Filme cadastrado com sucesso!'), nl,
+    telaLoginAdm(Login).
+
+telaListaFilmes(Login) :-
+    write('Menu>Ingressos>Ver Filmes em Cartaz'), nl,
+    write(''), nl,
+    write('Filmes em cartaz:'), nl.
 
 menuSala :-
     write('____________________________'), nl,
