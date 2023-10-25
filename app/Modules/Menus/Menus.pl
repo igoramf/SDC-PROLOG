@@ -3,6 +3,7 @@
 :- consult('../Util/Util.pl').
 %:- consult('../ToDoList/ToDoList.pl').
 :- consult('../Database/Database.pl').
+:- consult('../Sala/Sala.pl').
 
 menuInicial :-
     write('____________________________'), nl,
@@ -10,7 +11,8 @@ menuInicial :-
     write('1 - Login'), nl,
     write('2 - Cadastro'), nl,
     write('3 - Cadastro ADM'), nl,
-    write('4 - Sair'), nl,
+    white('4 - MenuSala'), nl,
+    write('5 - Sair'), nl,
     read(Opcao),
     (
         Opcao = 1 ->
@@ -23,6 +25,9 @@ menuInicial :-
             telaCadastroAdm
         ;
         Opcao = 4 ->
+            MenuSala
+        ;
+        Opcao = 5 ->
             write('Saindo...'), nl
         ;
             write('Opcao Invalida!'), nl
@@ -201,6 +206,68 @@ telaExibirPerfil(Login) :-
             write('Opcao Invalida!'), nl
     ).
 
+
+menuSala :-
+    write('____________________________'), nl,
+    write('SGC-GERENCIAMENTO DE SALAS'), nl,
+    write('1 - Cadastrar nova sala'), nl,
+    write('2 - Listar salas disponíveis'), nl,
+    write('3 - Associar sala a um filme e horário'), nl,
+    write('4 - Verificar a disponibilidade de um assento'), nl,
+    write('5 - Exibir os assentos disponíveis em uma sala'), nl,
+    write('6 - Associar um filme a uma sala'), nl,
+    write('7 - Voltar ao menu inicial'), nl,
+    read(Opcao),
+    (
+        Opcao = 1 ->
+            write('Digite o número da sala: '), read(N),
+            write('Digite a capacidade da sala: '), read(Capacidade),
+            cadastra_sala(N, Capacidade),
+            write('Sala cadastrada com sucesso!'), nl,
+            menuSala
+        ;
+        Opcao = 2 ->
+            lista_salas_disponiveis(SalasDisponiveis),
+            write('Salas Disponíveis: '), write(SalasDisponiveis), nl,
+            menuSala
+        ;
+        Opcao = 3 ->
+            write('Digite o número da sala: '), read(N),
+            write('Digite o nome do filme: '), read(Filme),
+            write('Digite o horário: '), read(Horario),
+            associar_sala_filme_horario(N, Filme, Horario),
+            write('Sala associada a filme e horário com sucesso!'), nl,
+            menuSala
+        ;
+        Opcao = 4 ->
+            write('Digite o número da sala: '), read(N),
+            write('Digite o número da fila: '), read(Fila),
+            write('Digite o número do assento: '), read(Assento),
+            (verificar_disponibilidade_assentos(N, Fila, Assento) ->
+                write('Assento disponível!'), nl
+            ;
+                write('Assento ocupado!'), nl
+            ),
+            menuSala
+        ;
+        Opcao = 5 ->
+            write('Digite o número da sala: '), read(N),
+            exibir_assentos_disponiveis(N),
+            menuSala
+        ;
+        Opcao = 6 ->
+            write('Digite o número da sala: '), read(N),
+            write('Digite o nome do filme: '), read(Filme),
+            write('Digite o gênero do filme: '), read(Genero),
+            write('Digite a duração do filme: '), read(Duracao),
+            associar_filme_sala(N, Filme, Genero, Duracao),
+            write('Filme associado à sala com sucesso!'), nl,
+            menuSala
+        ;
+        Opcao = 7 ->
+            menuInicial
+        ;
+    ).
 
 %Funções auxiliares pra listar listas
 %==================================================
