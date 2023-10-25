@@ -70,3 +70,4 @@ exibir_fileira([true | Resto]) :-
 exibir_fileira([false | Resto]) :-
     write('X '),
     exibir_fileira(Resto).
+
