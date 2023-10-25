@@ -11,7 +11,7 @@ menuInicial :-
     write('1 - Login'), nl,
     write('2 - Cadastro'), nl,
     write('3 - Cadastro ADM'), nl,
-    white('4 - MenuSala'), nl,
+    write('4 - MenuSala'), nl,
     write('5 - Sair'), nl,
     read(Opcao),
     (
