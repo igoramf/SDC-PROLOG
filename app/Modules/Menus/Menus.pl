@@ -13,8 +13,7 @@ menuInicial :-
     write('1 - Login'), nl,
     write('2 - Cadastro'), nl,
     write('3 - Cadastro ADM'), nl,
-    write('4 - MenuSala'), nl,
-    write('5 - Sair'), nl,
+    write('4 - Sair'), nl,
     read(Opcao),
     (
         Opcao = 1 ->
@@ -27,9 +26,6 @@ menuInicial :-
             telaCadastroAdm
         ;
         Opcao = 4 ->
-            MenuSala
-        ;
-        Opcao = 5 ->
             write('Saindo...'), nl
         ;
             write('Opcao Invalida!'), nl
@@ -134,7 +130,7 @@ telaListaIngressos(Login) :-
     write('Menu>Ingressos>Meus Ingressos'), nl,
     write(''), nl,
     write('Meus Ingressos:'), nl,
-    list_folders(DirectoryIngressos, Login, Login).
+    list_folders_ingressos(DirectoryIngressos, Login, Login).
 
 telaCompraIngressos(Login) :-
     write('Nome do Filme: '), nl,
@@ -155,7 +151,8 @@ telaLoginAdm(Login) :-
     write('1 - Perfil'), nl,
     write('2 - Cadastrar Filmes'), nl,
     write('3 - Dashboard'), nl,
-    write('4 - Logout'), nl,
+    write('4 - MenuSala'), nl,
+    write('5 - Logout'), nl,
     read(Opcao),
     (
         Opcao = 1 ->
@@ -168,6 +165,9 @@ telaLoginAdm(Login) :-
             menuInicial
         ;
         Opcao = 4 ->
+           menuSala
+        ;
+        Opcao = 5 ->
             menuInicial
         ;
         write('Opcao Invalida!'), nl
@@ -225,7 +225,11 @@ telaCadastraFilme(Login) :-
 telaListaFilmes(Login) :-
     write('Menu>Ingressos>Ver Filmes em Cartaz'), nl,
     write(''), nl,
-    write('Filmes em cartaz:'), nl.
+    write('Filmes em cartaz:'), nl,
+    write('Menu>Filmes'), nl,
+    write(''), nl,
+    write('Filmes em cartaz:'), nl,
+    list_folders_filmes("Modules/Database/Filmes", Login, Login).
 
 menuSala :-
     write('____________________________'), nl,
@@ -291,14 +295,46 @@ menuSala :-
 
 %Funções auxiliares pra listar listas
 %==================================================
-list_folders(Directory, Username, Username) :-
+list_folders_filmes(Directory, Username, Username) :-
     directory_files(Directory, Files),
     exclude(hidden_file, Files, Folders),
-    print_folder_names(Username, Folders, 1),
+    print_folder_filmes(Username, Folders, 1),
     choose_folder(Folders, Username, Username).
 
-print_folder_names(Username, [], _).
-print_folder_names(Username, [Folder|Rest], N) :-
+print_folder_filmes(Username, [], _).
+print_folder_filmes(Username, [Folder|Rest], N) :-
+    \+ special_folder(Folder), % Verifica se a pasta é "." ou ".."
+    format('~d - ~w~n', [N, Folder]),
+    concatenar_strings("Modules/Database/Filmes/", Folder, DirectoryIngressosFolder),
+    concatenar_strings(Folder, '.txt', Foldertxt),
+    concatenar_strings(DirectoryIngressosFolder, '/', DirectoryIngressosFolder2),
+    concatenar_strings(DirectoryIngressosFolder2, Foldertxt, DirectoryUserFinal),
+    ler_user(DirectoryUserFinal, Dados),
+    print_filme_to_string(Dados),
+    NextN is N + 1,
+    print_folder_filmes(Username, Rest, NextN).
+
+print_folder_filmes(Username, [_|Rest], N) :-
+    NextN is N + 1,
+    print_folder_filmes(Username, Rest, NextN).
+
+print_filme_to_string(Dados) :-
+    nth0(0, Dados, IdFilme),
+    concatenar_strings("Id do Filme: ", IdFilme, IdFilmeStr),
+    write(IdFilmeStr),nl,
+    nth0(2, Dados, Valor),
+    concatenar_strings("Valor do ingresso: ", Valor, ValorFilmeStr),
+    write(ValorFilmeStr),nl.
+
+
+list_folders_ingressos(Directory, Username, Username) :-
+    directory_files(Directory, Files),
+    exclude(hidden_file, Files, Folders),
+    print_folder_ingressos(Username, Folders, 1),
+    choose_folder(Folders, Username, Username).
+
+print_folder_ingressos(Username, [], _).
+print_folder_ingressos(Username, [Folder|Rest], N) :-
     \+ special_folder(Folder), % Verifica se a pasta é "." ou ".."
     format('~d - ~w~n', [N, Folder]),
     directoryDatabase(Directory), 
@@ -310,18 +346,32 @@ print_folder_names(Username, [Folder|Rest], N) :-
     concatenar_strings(DirectoryIngressosFolder, '/', DirectoryIngressosFolder2),
     concatenar_strings(DirectoryIngressosFolder2, Foldertxt, DirectoryUserFinal),
     ler_user(DirectoryUserFinal, Dados),
-    write(Dados), nl,
+    print_ingresso_to_string(Dados),
     NextN is N + 1,
-    print_folder_names(Username, Rest, NextN).
+    print_folder_ingressos(Username, Rest, NextN).
 
-print_folder_names(Username, [_|Rest], N) :-
+print_folder_ingressos(Username, [_|Rest], N) :-
     NextN is N + 1,
-    print_folder_names(Username, Rest, NextN).
+    print_folder_ingressos(Username, Rest, NextN).
+
+print_ingresso_to_string(Dados) :-
+    nth0(0, Dados, IdIngresso),
+    concatenar_strings("Id do Ingresso: ", IdIngresso, IdIngressoStr),
+    write(IdIngressoStr),nl,
+    nth0(1, Dados, FilmeNome),
+    concatenar_strings("Nome do filme: ", FilmeNome, FilmeNomeStr),
+    write(FilmeNomeStr),nl,
+    nth0(2, Dados, Valor),
+    concatenar_strings("Valor: ", Valor, ValorStr),
+    write(ValorStr),nl,
+    nth0(3, Dados, Assento),
+    concatenar_strings("Assento: ", Assento, AssentoStr),
+    write(AssentoStr),nl.
 
 choose_folder(Folders, Username, Username) :-
-    write('Escolha o número da pasta (ou 0 para sair): '),
+    write('Digite 0 para sair): '),
     read(Number),
-    process_choice(Number, Folders, Username, Username).
+    telaLogin(Username).
 
 process_choice(0, _, _, _) :- telaListas(Username).
 process_choice(Number, Folders, Username, Username) :-
