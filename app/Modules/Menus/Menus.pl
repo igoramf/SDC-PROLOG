@@ -164,7 +164,7 @@ telaLoginAdm(Login) :-
            list_dashboard(Directory, Username, Username)
         ;
         Opcao = 4 ->
-           telaMenuSala
+           tela_menu_sala
         ;
         Opcao = 5 ->
             menuInicial
@@ -230,7 +230,8 @@ telaListaFilmes(Login) :-
     write('Filmes em cartaz:'), nl,
     list_folders_filmes("Modules/Database/Filmes", Login, Login).
 
-telaMenuSala :-
+tela_menu_sala :-
+    repeat,
     write('____________________________'), nl,
     write('SGC-GERENCIAMENTO DE SALAS'), nl,
     write('1 - Cadastrar nova sala'), nl,
@@ -246,21 +247,18 @@ telaMenuSala :-
             write('Digite o número da sala: '), read(N),
             write('Digite a capacidade da sala: '), read(Capacidade),
             cadastra_sala(N, Capacidade),
-            write('Sala cadastrada com sucesso!'), nl,
-            telaMenuSala
+            write('Sala cadastrada com sucesso!'), nl
         ;
         Opcao = 2 ->
             lista_salas_disponiveis(SalasDisponiveis),
-            write('Salas Disponíveis: '), write(SalasDisponiveis), nl,
-            telaMenuSala
+            write('Salas Disponíveis: '), write(SalasDisponiveis), nl
         ;
         Opcao = 3 ->
             write('Digite o número da sala: '), read(N),
             write('Digite o nome do filme: '), read(Filme),
             write('Digite o horário: '), read(Horario),
             associar_sala_filme_horario(N, Filme, Horario),
-            write('Sala associada a filme e horário com sucesso!'), nl,
-            telaMenuSala
+            write('Sala associada a filme e horário com sucesso!'), nl
         ;
         Opcao = 4 ->
             write('Digite o número da sala: '), read(N),
@@ -270,13 +268,11 @@ telaMenuSala :-
                 write('Assento disponível!'), nl
             ;
                 write('Assento ocupado!'), nl
-            ),
-            telaMenuSala
+            )
         ;
         Opcao = 5 ->
             write('Digite o número da sala: '), read(N),
-            exibir_assentos_disponiveis(N),
-            telaMenuSala
+            exibir_assentos_disponiveis(N)
         ;
         Opcao = 6 ->
             write('Digite o número da sala: '), read(N),
@@ -284,13 +280,14 @@ telaMenuSala :-
             write('Digite o gênero do filme: '), read(Genero),
             write('Digite a duração do filme: '), read(Duracao),
             associar_filme_sala(N, Filme, Genero, Duracao),
-            write('Filme associado à sala com sucesso!'), nl,
-            telaMenuSala
+            write('Filme associado à sala com sucesso!'), nl
         ;
         Opcao = 7 ->
             menuInicial
         ;
-    ).
+        true 
+    ),
+    Opcao = 7, !. 
 
 %Funcoes para o Dashboard
 list_dashboard(Directory, Username, Username) :-
