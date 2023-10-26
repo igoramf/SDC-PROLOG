@@ -62,3 +62,7 @@ delete_entry(Directory, Entry) :-
     ->  delete_directory_and_contents(Path)
     ;   delete_file(Path)
     ).
+
+
+converte_string_para_inteiro(String, Inteiro) :-
+    number_codes(Inteiro, String).

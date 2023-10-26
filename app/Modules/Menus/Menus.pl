@@ -2,7 +2,6 @@
 :- consult('../Ingresso/Ingresso.pl').
 :- consult('../Filmes/Filme.pl').
 :- consult('../Util/Util.pl').
-%:- consult('../ToDoList/ToDoList.pl').
 :- consult('../Database/Database.pl').
 :- consult('../Sala/Sala.pl').
 
@@ -162,10 +161,10 @@ telaLoginAdm(Login) :-
             telaCadastraFilme(Login)
         ;
         Opcao = 3 ->
-            menuInicial
+           list_dashboard(Directory, Username, Username)
         ;
         Opcao = 4 ->
-           menuSala
+           telaMenuSala
         ;
         Opcao = 5 ->
             menuInicial
@@ -231,7 +230,7 @@ telaListaFilmes(Login) :-
     write('Filmes em cartaz:'), nl,
     list_folders_filmes("Modules/Database/Filmes", Login, Login).
 
-menuSala :-
+telaMenuSala :-
     write('____________________________'), nl,
     write('SGC-GERENCIAMENTO DE SALAS'), nl,
     write('1 - Cadastrar nova sala'), nl,
@@ -248,12 +247,12 @@ menuSala :-
             write('Digite a capacidade da sala: '), read(Capacidade),
             cadastra_sala(N, Capacidade),
             write('Sala cadastrada com sucesso!'), nl,
-            menuSala
+            telaMenuSala
         ;
         Opcao = 2 ->
             lista_salas_disponiveis(SalasDisponiveis),
             write('Salas Disponíveis: '), write(SalasDisponiveis), nl,
-            menuSala
+            telaMenuSala
         ;
         Opcao = 3 ->
             write('Digite o número da sala: '), read(N),
@@ -261,7 +260,7 @@ menuSala :-
             write('Digite o horário: '), read(Horario),
             associar_sala_filme_horario(N, Filme, Horario),
             write('Sala associada a filme e horário com sucesso!'), nl,
-            menuSala
+            telaMenuSala
         ;
         Opcao = 4 ->
             write('Digite o número da sala: '), read(N),
@@ -272,12 +271,12 @@ menuSala :-
             ;
                 write('Assento ocupado!'), nl
             ),
-            menuSala
+            telaMenuSala
         ;
         Opcao = 5 ->
             write('Digite o número da sala: '), read(N),
             exibir_assentos_disponiveis(N),
-            menuSala
+            telaMenuSala
         ;
         Opcao = 6 ->
             write('Digite o número da sala: '), read(N),
@@ -286,12 +285,100 @@ menuSala :-
             write('Digite a duração do filme: '), read(Duracao),
             associar_filme_sala(N, Filme, Genero, Duracao),
             write('Filme associado à sala com sucesso!'), nl,
-            menuSala
+            telaMenuSala
         ;
         Opcao = 7 ->
             menuInicial
         ;
     ).
+
+%Funcoes para o Dashboard
+list_dashboard(Directory, Username, Username) :-
+    directory_files("Modules/Database/LocalUsers", Files),
+    exclude(hidden_file, Files, Folders),
+    acumulador_ingressos_dashboard(Username, Folders, N),
+    concatenar_strings("Valor Total de Ingressos Vendidos: ", N, Result),
+    write(Result), nl,
+    write("Filmes em exibicao: "), nl,
+    list_filmes_dashboard("Modules/Database/Filmes", Login, Login),
+    choose_folder(Folders, Username, Username).
+
+% Versão modificada da função acumulador_ingressos_dashboard/3
+acumulador_ingressos_dashboard(Username, Folders, N) :-
+    acumulador_ingressos_dashboard(Username, Folders, 0, N).
+
+% Caso base: Quando a lista de pastas estiver vazia, unifica N com o resultado.
+acumulador_ingressos_dashboard(_, [], N, N).
+
+% Caso em que a pasta não é especial
+acumulador_ingressos_dashboard(Username, [Folder|Rest], Acc, N) :-
+    \+ special_folder(Folder), % Verifica se a pasta é "." ou "..",
+    directoryDatabase(Directory),
+    concatenar_strings(Directory, Folder, DirectoryLogin),
+    concatenar_strings(DirectoryLogin, '/', DirectoryLoginBarra),
+    concatenar_strings(DirectoryLoginBarra, 'ingressos', DirectoryIngressos),
+    directory_files(DirectoryIngressos, Files),
+    exclude(hidden_file, Files, FoldersIngressos),
+    soma_ingressos(Folder, FoldersIngressos, 0, Retorno),
+    NextAcc is Acc + Retorno,
+    acumulador_ingressos_dashboard(Username, Rest, NextAcc, N).
+
+% Caso em que a pasta é especial
+acumulador_ingressos_dashboard(Username, [_|Rest], Acc, N) :-
+    acumulador_ingressos_dashboard(Username, Rest, Acc, N).
+
+soma_ingressos(Username, Folders, N) :-
+    soma_ingressos(Username, Folders, 0, N).
+
+% Caso base: Quando a lista de pastas estiver vazia, unifica N com o resultado.
+soma_ingressos(_, [], N, N).
+
+% Caso em que a pasta não é especial
+soma_ingressos(Username, [Folder|Rest], Acc, N) :-
+    \+ special_folder(Folder), % Verifica se a pasta é "." ou "..",
+    directoryDatabase(Directory), 
+    concatenar_strings(Directory, Username, DirectoryUser),
+    concatenar_strings(DirectoryUser, '/ingressos', DirectoryIngressos),
+    concatenar_strings(DirectoryIngressos, '/', DirectoryIngressos2),
+    concatenar_strings(DirectoryIngressos2, Folder, DirectoryIngressosFolder),
+    concatenar_strings(Folder, '.txt', Foldertxt),
+    concatenar_strings(DirectoryIngressosFolder, '/', DirectoryIngressosFolder2),
+    concatenar_strings(DirectoryIngressosFolder2, Foldertxt, DirectoryUserFinal),
+    ler_user(DirectoryUserFinal, Dados),
+    nth0(2, Dados, Valor),
+    concatenar_strings("Valor: ", Valor, ValorStr),
+    converte_string_para_inteiro(Valor, ValorInteiro),
+    NextN is Acc + ValorInteiro,
+    soma_ingressos(Username, Rest, NextN, N),
+    !. % Corte para evitar backtracking
+
+% Caso em que a pasta é especial
+soma_ingressos(Username, [_|Rest], Acc, N) :-
+    soma_ingressos(Username, Rest, Acc, N).
+
+
+list_filmes_dashboard(Directory, Username, Username) :-
+    directory_files(Directory, Files),
+    exclude(hidden_file, Files, Folders),
+    print_filmes_dashboard(Username, Folders, 1),
+    choose_folder(Folders, Username, Username).
+
+print_filmes_dashboard(Username, [], _).
+print_filmes_dashboard(Username, [Folder|Rest], N) :-
+    \+ special_folder(Folder), % Verifica se a pasta é "." ou ".."
+    format('~d - ~w~n', [N, Folder]),
+    concatenar_strings("Modules/Database/Filmes/", Folder, DirectoryIngressosFolder),
+    concatenar_strings(Folder, '.txt', Foldertxt),
+    concatenar_strings(DirectoryIngressosFolder, '/', DirectoryIngressosFolder2),
+    concatenar_strings(DirectoryIngressosFolder2, Foldertxt, DirectoryUserFinal),
+    ler_user(DirectoryUserFinal, Dados),
+    NextN is N + 1,
+    print_filmes_dashboard(Username, Rest, NextN).
+
+print_filmes_dashboard(Username, [_|Rest], N) :-
+    NextN is N + 1,
+    print_filmes_dashboard(Username, Rest, NextN).
+
 
 %Funções auxiliares pra listar listas
 %==================================================
@@ -369,7 +456,7 @@ print_ingresso_to_string(Dados) :-
     write(AssentoStr),nl.
 
 choose_folder(Folders, Username, Username) :-
-    write('Digite 0 para sair): '),
+    write('Digite 0 para sair: '),
     read(Number),
     telaLogin(Username).
 
