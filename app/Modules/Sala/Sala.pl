@@ -7,6 +7,7 @@
 % - Para exibir os assentos disponíveis de uma sala: exibir_assentos_disponiveis(1).
 % - Para associar um filme a uma sala: associar_filme_sala(2, 'Taxi Driver', 'Drama', 140).
 
+:- consult('../Database/Database.pl').
 
 % Definição da estrutura de uma sala
 :- dynamic sala/5.
@@ -14,6 +15,7 @@
 
 % Cadastrar uma nova sala
 cadastra_sala(N, Capacidade) :-
+    createSalaDatabasesala((N, Capacidade)),
     retractall(sala(N, _, _, _, _)),
     assert(sala(N, Capacidade, sem_filme, sem_horario, [])),
     indexar_assentos(N, Capacidade).

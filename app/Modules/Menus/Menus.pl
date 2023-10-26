@@ -251,7 +251,7 @@ tela_menu_sala :-
         ;
         Opcao = 2 ->
             lista_salas_disponiveis(SalasDisponiveis),
-            write('Salas Disponíveis: '), write(SalasDisponiveis), nl
+            write('Salas Disponíveis: '), list_folders_salas("Modules/Database/Salas", Login, Login), nl
         ;
         Opcao = 3 ->
             write('Digite o número da sala: '), read(N),
@@ -469,4 +469,46 @@ hidden_file(File) :-
     
 special_folder('.').
 special_folder('..').
+
+list_folders_salas(Directory, Username, Username) :-
+    directory_files(Directory, Files),
+    exclude(hidden_file, Files, Folders),
+    print_folder_salas(Username, Folders, 1),
+    choose_folder(Folders, Username, Username).
+
+print_folder_salas(_, [], _).
+print_folder_salas(Username, [Folder|Rest], N) :-
+    \+ special_folder(Folder), % Verifica se a pasta é "." ou ".."
+    format('~d - ~w~n', [N, Folder]),
+    atomic_list_concat(["Modules/Database/Salas/", Folder], '/', DirectoryIngressosFolder),
+    atomic_list_concat([Folder, '.txt'], '', Foldertxt),
+    atomic_list_concat([DirectoryIngressosFolder, Foldertxt], '/', DirectoryUserFinal),
+    ler_user(DirectoryUserFinal, Dados),
+    print_salas_to_string(Dados),
+    NextN is N + 1,
+    print_folder_salas(Username, Rest, NextN).
+
+print_folder_salas(Username, [_|Rest], N) :-
+    NextN is N + 1,
+    print_folder_salas(Username, Rest, NextN).
+
+print_salas_to_string(Dados) :-
+    print_salas_to_string(Dados, 1).
+
+print_salas_to_string([], _).
+print_salas_to_string([IdFilme, Capacidade | Rest], N) :-
+    format("Id da sala: ~w~n", [IdFilme]),
+    format("Capacidade: ~w~n", [Capacidade]),
+    NextN is N + 1,
+    skip_empty_lines,
+    print_salas_to_string(Rest, NextN).
+
+skip_empty_lines :-
+    at_end_of_stream,
+    !.
+skip_empty_lines :-
+    read_line_to_codes(user_input, _),
+    skip_empty_lines.
+
+
 %===========================================================================
